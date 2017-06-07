@@ -107,6 +107,12 @@ vec3 calculateDirectionalLights(in DirectionalLight light, in vec3 normal, in ve
 vec3 calculatePointLights(in PointLight light, in vec3 normal, in vec3 fromFragToEye);
 vec3 calculateFlashLights(in FlashLight light, in vec3 normal, in vec3 fromFragToEye);
 
+float linearizeDepth(float depth);
+
+float near = 0.1;
+float far = 200.0;
+
+
 void main()
 {
 	vec3 result;
@@ -127,7 +133,10 @@ void main()
 		result += calculatePointLights(roundLamp, normal, fromFragToEye);
 	}
 
-	gl_FragColor = vec4(result, 1.0f);
+	// linearize depth
+	float depth = linearizeDepth(gl_FragCoord.z) / far;
+
+	gl_FragColor = vec4(vec3(clamp(depth, 0.0f, 0.3f)) + result, 1.0f);
 }
 
 
@@ -231,4 +240,11 @@ vec3 calculateFlashLights(in FlashLight light, in vec3 normal, in vec3 fromFragT
 	//specular *= intensity;
 
 	return (ambient + diffuse);
+}
+
+
+float linearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	return (2.0 * near * far) / (far + near - z * (far - near));
 }

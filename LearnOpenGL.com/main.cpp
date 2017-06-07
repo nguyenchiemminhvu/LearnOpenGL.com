@@ -90,11 +90,12 @@ int main()
 	// -------------------------------------------------------------
 	// setup before game loop
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
 
 	last_time = cur_time = glfwGetTime();
 
 	Shader shader("shaders/Mesh.VS", "shaders/Mesh.FS");
-	Model model("models/house/farmhouse_obj.obj");
+	Model model("models/castle/Castle.obj");
 
 	// OpenGL loop
 	while (!glfwWindowShouldClose(window))

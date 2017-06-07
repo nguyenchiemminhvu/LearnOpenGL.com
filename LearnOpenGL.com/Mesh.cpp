@@ -4,7 +4,7 @@
 extern Camera camera;
 extern int isFlashLightOn;
 
-Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<TextureMesh> textures)
+Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -27,7 +27,7 @@ void Mesh::Draw(Shader shader)
 										  // retrieve texture number (the N in diffuse_textureN)
 		stringstream ss;
 		string number;
-		string name = textures[i].type;
+		string name = textures[i].getTextureType();
 		if (name == "texture_diffuse")
 			ss << diffuseNr++; // transfer unsigned int to stream
 		else if (name == "texture_specular")
@@ -40,7 +40,7 @@ void Mesh::Draw(Shader shader)
 		// now set the sampler to the correct texture unit
 		glUniform1i(glGetUniformLocation(shader.getProgramID(), ("material." + name + number).c_str()), i);
 		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		glBindTexture(GL_TEXTURE_2D, textures[i].getTextureID());
 	}
 
 	// draw mesh

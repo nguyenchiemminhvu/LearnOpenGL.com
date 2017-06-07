@@ -123,7 +123,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	// data to fill
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
-	vector<TextureMesh> textures;
+	vector<Texture> textures;
 
 	// Walk through each of the mesh's vertices
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -184,16 +184,16 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		// normal: texture_normalN
 
 		// 1. diffuse maps
-		vector<TextureMesh> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		// 2. specular maps
-		vector<TextureMesh> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		// 3. normal maps
-		std::vector<TextureMesh> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		// 4. height maps
-		std::vector<TextureMesh> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
@@ -201,9 +201,9 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	return Mesh(vertices, indices, textures);
 }
 
-vector<TextureMesh> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, string typeName)
+vector<Texture> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, string typeName)
 {
-	vector<TextureMesh> textures;
+	vector<Texture> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
@@ -212,7 +212,7 @@ vector<TextureMesh> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType 
 		bool skip = false;
 		for (unsigned int j = 0; j < textures_loaded.size(); j++)
 		{
-			if (std::strcmp(textures_loaded[j].path.c_str(), str.C_Str()) == 0)
+			if (std::strcmp(textures_loaded[j].getPath().c_str(), str.C_Str()) == 0)
 			{
 				textures.push_back(textures_loaded[j]);
 				skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -221,10 +221,10 @@ vector<TextureMesh> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType 
 		}
 		if (!skip)
 		{   // if texture hasn't been loaded already, load it
-			TextureMesh texture;
-			texture.id = TextureFromFile(str.C_Str(), this->directory);
-			texture.type = typeName;
-			texture.path = str.C_Str();
+			Texture texture;
+			texture = (TextureFromFile(str.C_Str(), this->directory));
+			texture.setTextureType(typeName);
+			texture.setPath(str.C_Str());
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 		}
@@ -232,13 +232,14 @@ vector<TextureMesh> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType 
 	return textures;
 }
 
-unsigned int TextureFromFile(const char * path, const string & directory, bool gamma)
+Texture TextureFromFile(const char * path, const string & directory, bool gamma)
 {
+	Texture texture;
+
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
+	unsigned int textureID = texture.getTextureID();
 
 	int width, height, nrComponents;
 	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
@@ -269,5 +270,5 @@ unsigned int TextureFromFile(const char * path, const string & directory, bool g
 		stbi_image_free(data);
 	}
 
-	return textureID;
+	return texture;
 }

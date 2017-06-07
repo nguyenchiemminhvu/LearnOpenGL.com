@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include "Shader.h"
+#include "Texture.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -25,23 +26,18 @@ struct Vertex {
 	glm::vec3 Bitangent;
 };
 
-struct TextureMesh {
-	unsigned int id;
-	string type;
-	string path;
-};
 
 class Mesh {
 public:
 	/*  Mesh Data  */
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
-	vector<TextureMesh> textures;
+	vector<Texture> textures;
 	unsigned int VAO;
 
 	/*  Functions  */
 	// constructor
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<TextureMesh> textures);
+	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
 
 	// render the mesh
 	void Draw(Shader shader);

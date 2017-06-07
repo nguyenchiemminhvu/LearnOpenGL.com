@@ -22,11 +22,10 @@ public:
 	void deleteBuffer();
 	void renderElements(GLenum mode, GLsizei count, GLenum type, const void *indices);
 
-	void *getData();
-
 private:
+
 	GLuint elementBufferID;
-	void *data;
+
 };
 
 #endif //__ELEMENT_BUFFER_H__

@@ -23,7 +23,7 @@ void Mesh::Draw(Shader shader)
 	unsigned int heightNr = 1;
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+		Texture::active(textures.at(i).getTextureID()); // active proper texture unit before binding
 										  // retrieve texture number (the N in diffuse_textureN)
 		stringstream ss;
 		string number;
@@ -37,10 +37,9 @@ void Mesh::Draw(Shader shader)
 		else if (name == "texture_height")
 			ss << heightNr++; // transfer unsigned int to stream
 		number = ss.str();
-		// now set the sampler to the correct texture unit
-		glUniform1i(glGetUniformLocation(shader.getProgramID(), ("material." + name + number).c_str()), i);
-		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, textures[i].getTextureID());
+		
+		shader.setUniform1i(("material." + name + number).c_str(), i);
+		textures.at(i).bind();
 	}
 
 	// draw mesh

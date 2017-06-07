@@ -12,8 +12,6 @@ ElementBuffer::ElementBuffer(GLsizeiptr size, const void *data)
 	glGenBuffers(1, &elementBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-
-	this->data = const_cast<void *>(data);
 }
 
 
@@ -27,8 +25,6 @@ void ElementBuffer::setData(GLsizeiptr size, const void * data)
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-
-	this->data = const_cast<void *>(data);
 }
 
 
@@ -59,10 +55,4 @@ void ElementBuffer::deleteBuffer()
 void ElementBuffer::renderElements(GLenum mode, GLsizei count, GLenum type, const void *indices)
 {
 	glDrawElements(mode, count, type, indices);
-}
-
-
-void * ElementBuffer::getData()
-{
-	return this->data;
 }

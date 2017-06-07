@@ -90,6 +90,12 @@ int main()
 	// -------------------------------------------------------------
 	// setup before game loop
 	glEnable(GL_DEPTH_TEST);
+
+	// -------------------------------------------------------------
+	// Enable writing to the stencil buffer.
+	// Render objects, updating the content of the stencil buffer.
+	// Disable writing to the stencil buffer.
+	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
 	glEnable(GL_STENCIL_TEST);
 
 	last_time = cur_time = glfwGetTime();

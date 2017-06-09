@@ -78,9 +78,6 @@ private:
 
 	GLFWwindow *window;
 
-	GLdouble lastTime;
-	GLfloat deltaTime;
-
 	void initTime();
 	void initCallbackFunction();
 };

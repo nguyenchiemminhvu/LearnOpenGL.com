@@ -5,7 +5,9 @@ uniform vec3 eyePos;
 
 varying vec2 UV;
 
+uniform sampler2D tex;
+
 void main()
 {
-	gl_FragColor = vec4(0.04f, 0.28f, 0.26f, 1.0f);
+	gl_FragColor = texture(tex, UV);
 }

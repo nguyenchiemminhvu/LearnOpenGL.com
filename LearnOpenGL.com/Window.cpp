@@ -56,7 +56,7 @@ Window::Window(const GLchar *title, GLuint width, GLuint height)
 	// -------------------------------------------------------------
 	// setup GL Viewport
 	glfwGetFramebufferSize(window, &::width, &::height);
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, ::width, ::height);
 
 	// -------------------------------------------------------------
 	// disable mouse cursor
@@ -80,14 +80,26 @@ int Window::exec() {
 
 	// --------------------------------------------------------------
 	// prepare for game loop
-	glEnable(GL_DEPTH_TEST);
 
-	// -------------------------------------------------------------
 	// Enable writing to the stencil buffer.
 	// Render objects, updating the content of the stencil buffer.
 	// Disable writing to the stencil buffer.
 	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	Shader singleColor("shaders/StencilBoder.VS", "shaders/StencilBorder.FS");
+	Shader object("shaders/StencilTest.VS", "shaders/StencilTest.FS");
+
+	// cube
+	Cube cube("textures/wall.png");
+	VertexArray vaoCube;
+	VertexBuffer vboCube;
+
+	// plane
 
 
 	// --------------------------------------------------------------
@@ -96,20 +108,20 @@ int Window::exec() {
 	{
 		glfwPollEvents();
 
-		deltaTime = glfwGetTime() - lastTime;
-		lastTime = glfwGetTime();
+		::deltaTime = glfwGetTime() - ::last_time;
+		::last_time = glfwGetTime();
 		/* calculate FPS */
 		GLfloat fps = 1.0f / deltaTime;
-		while (glfwGetTime() - lastTime < 1.0f / FPS) {
+		while (glfwGetTime() - ::last_time < 1.0f / FPS) {
 
 		}
 		updateCamera();
 
 		// drawing
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-
+		
 
 		swapBuffer();
 	}
@@ -204,8 +216,8 @@ void Window::windowViewport(GLint x, GLint y, GLuint width, GLuint height) {
 
 
 void Window::initTime() {
-	lastTime = glfwGetTime();
-	deltaTime = 0;
+	::last_time = glfwGetTime();
+	::deltaTime = 0;
 }
 
 

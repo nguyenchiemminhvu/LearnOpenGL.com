@@ -80,7 +80,14 @@ int Window::exec() {
 
 	// --------------------------------------------------------------
 	// prepare for game loop
+	glEnable(GL_DEPTH_TEST);
 
+	// -------------------------------------------------------------
+	// Enable writing to the stencil buffer.
+	// Render objects, updating the content of the stencil buffer.
+	// Disable writing to the stencil buffer.
+	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
+	glEnable(GL_STENCIL_TEST);
 
 
 	// --------------------------------------------------------------
@@ -98,7 +105,11 @@ int Window::exec() {
 		}
 		updateCamera();
 
-		
+		// drawing
+		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
 		swapBuffer();
 	}

@@ -3,3 +3,4 @@
 *.db
 *.opendb
 /LearnOpenGL.com/Debug/*
+/.vs/*.*

@@ -4,3 +4,6 @@
 *.opendb
 /LearnOpenGL.com/Debug/*
 /.vs/*.*
+/Debug/*.exe
+/Debug/*.ilk
+/Debug/*.pdb

@@ -1,8 +1,5 @@
 #version 330 core
 
-uniform vec3 eyePos;
-#version 330 core
-
 varying vec2 UV;
 
 void main()

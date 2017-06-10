@@ -84,4 +84,6 @@ Cube::Cube(const char *diffuseTex, const char *specularTex)
 
 Cube::~Cube()
 {
+
 }
+

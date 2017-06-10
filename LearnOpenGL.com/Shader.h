@@ -15,6 +15,7 @@ public:
 	void setupShader(GLchar *vertexPath, GLchar *fragmentPath);
 
 	GLuint getProgramID();
+	GLint getAttribLocation(const char *name);
 
 	void use();
 	void deleteShader();

@@ -19,6 +19,7 @@
 
 #include "Material.h"
 #include "Cube.h"
+#include "Plane.h"
 
 #include <stdio.h>
 #include <string.h>

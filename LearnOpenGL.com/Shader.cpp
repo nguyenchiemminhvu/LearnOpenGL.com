@@ -40,6 +40,13 @@ GLuint Shader::getProgramID()
 	return shaderProgram;
 }
 
+
+GLint Shader::getAttribLocation(const char * name)
+{
+	return glGetAttribLocation(shaderProgram, name);
+}
+
+
 void Shader::use()
 {
 	glUseProgram(shaderProgram);

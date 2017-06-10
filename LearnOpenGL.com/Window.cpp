@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include <iostream>
 
+#define __CURRENT_LESSION__ 3
+
+#define __GET_STARTED__		1
+#define __LIGHTING__		2
+#define __MODEL__ 			3
+#define __DEPTH_TEST__		4
+#define __STENCIL_TEST__	5
+
 using std::cout;
 using std::endl;
 
@@ -75,6 +83,56 @@ Window::~Window()
 	terminate();
 }
 
+#if (__CURRENT_LESSION__ == __GET_STARTED__)
+
+#elif (__CURRENT_LESSION__ == __LIGHTING__)
+
+#elif (__CURRENT_LESSION__ == __MODEL__)
+int Window::exec() {
+
+	// --------------------------------------------------------------
+	// prepare for game loop
+
+	// Enable writing to the stencil buffer.
+	// Render objects, updating the content of the stencil buffer.
+	// Disable writing to the stencil buffer.
+	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
+	glEnable(GL_DEPTH_TEST);
+
+	Shader shader("shaders/Mesh.VS", "shaders/Mesh.FS");
+	Model model("models/house/farmhouse_obj.obj");
+	
+
+
+	// --------------------------------------------------------------
+	// game loop
+	while (!windowShouldClose())
+	{
+		glfwPollEvents();
+
+		::deltaTime = glfwGetTime() - ::last_time;
+		::last_time = glfwGetTime();
+		/* calculate FPS */
+		GLfloat fps = 1.0f / deltaTime;
+		while (glfwGetTime() - ::last_time < 1.0f / FPS) {
+
+		}
+		updateCamera();
+
+		// drawing
+		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader.use();
+		model.Draw(shader);
+
+		swapBuffer();
+	}
+
+	return 0;
+}
+
+#elif (__CURRENT_LESSION__ == __STENCIL_TEST__)
 
 int Window::exec() {
 
@@ -91,20 +149,11 @@ int Window::exec() {
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-	Shader singleColor("shaders/StencilBoder.VS", "shaders/StencilBorder.FS");
-	Shader object("shaders/StencilTest.VS", "shaders/StencilTest.FS");
-
-	// cube
-	Cube cube("textures/wall.png");
-	VertexArray vaoCube;
-	VertexBuffer vboCube;
-
-	// plane
 
 
 	// --------------------------------------------------------------
 	// game loop
-	while (!windowShouldClose()) 
+	while (!windowShouldClose())
 	{
 		glfwPollEvents();
 
@@ -128,6 +177,8 @@ int Window::exec() {
 
 	return 0;
 }
+
+#endif
 
 
 void Window::terminate() {

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#define __CURRENT_LESSION__ 3
+#define __CURRENT_LESSION__ 5
 
 #define __GET_STARTED__		1
 #define __LIGHTING__		2
@@ -121,7 +121,7 @@ int Window::exec() {
 
 		// drawing
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		shader.use();
 		model.Draw(shader);
@@ -139,17 +139,89 @@ int Window::exec() {
 	// --------------------------------------------------------------
 	// prepare for game loop
 
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+	};
+
+	Shader cubeShader("shaders/StencilTest.VS", "shaders/StencilTest.FS");
+
+	VertexArray vao;
+	vao.bind();
+
+	VertexBuffer vbo;
+	vbo.setData(sizeof(vertices), vertices);
+
+	vao.enableAttribute(cubeShader.getAttribLocation("position"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(0));
+	vao.enableAttribute(cubeShader.getAttribLocation("color"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("color"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+	vao.enableAttribute(cubeShader.getAttribLocation("uv"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat)));
+	
+	vbo.unbind();
+	vao.unbind();
+
+	Texture cubeTex;
+	cubeTex.bind();
+	cubeTex.loadImage("textures/wall.png");
+	cubeTex.textureParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	cubeTex.textureParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
+	cubeTex.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	cubeTex.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	cubeTex.generateMipmap();
+	cubeTex.unbind();
+
 	// Enable writing to the stencil buffer.
 	// Render objects, updating the content of the stencil buffer.
 	// Disable writing to the stencil buffer.
 	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	//glDepthFunc(GL_LESS);
+	//glEnable(GL_STENCIL_TEST);
+	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-
+	
 
 	// --------------------------------------------------------------
 	// game loop
@@ -168,9 +240,32 @@ int Window::exec() {
 
 		// drawing
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+		cubeShader.use();
+
+		// model view projection matrix
+		{
+			glm::mat4 model;
+			model = glm::translate(model, glm::vec3(0, 0, 0));
+			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			glm::mat4 view = camera.getViewMatrix();
+			glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniformMatrix4fv("view", 1, GL_FALSE, glm::value_ptr(view));
+			cubeShader.setUniformMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(projection));
+		}
+
+		Texture::active(cubeTex.getTextureID());
+		cubeTex.bind();
+		cubeShader.setUniform1i("tex", cubeTex.getTextureID());
+
+		vbo.bind();
+		vao.bind();
+		vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+		vao.unbind();
+		vbo.unbind();
 
 		swapBuffer();
 	}

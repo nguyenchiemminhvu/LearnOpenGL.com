@@ -180,7 +180,14 @@ int Window::exec() {
 		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+		- 1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
 	};
 
 	Shader cubeShader("shaders/StencilTest.VS", "shaders/StencilTest.FS");
@@ -216,11 +223,11 @@ int Window::exec() {
 	// Disable writing to the stencil buffer.
 	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
 	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LESS);
-	//glEnable(GL_STENCIL_TEST);
-	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
+	glDepthFunc(GL_LESS);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_EQUAL, 0, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilMask(0x00);
 	
 
 	// --------------------------------------------------------------
@@ -240,18 +247,20 @@ int Window::exec() {
 
 		// drawing
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		cubeShader.use();
 
 		// model view projection matrix
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
 		{
-			glm::mat4 model;
 			model = glm::translate(model, glm::vec3(0, 0, 0));
-			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			view = camera.getViewMatrix();
+			projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 
-			glm::mat4 view = camera.getViewMatrix();
-			glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
 			cubeShader.setUniformMatrix4fv("view", 1, GL_FALSE, glm::value_ptr(view));
 			cubeShader.setUniformMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(projection));
@@ -264,6 +273,17 @@ int Window::exec() {
 		vbo.bind();
 		vao.bind();
 		vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+		vbo.renderBuffer(GL_TRIANGLES, 36, 6);
+
+		// reflection
+		{
+			model = glm::translate(model, glm::vec3(0, 0, -1));
+			model = glm::scale(model, glm::vec3(1, 1, -1));
+
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+		}
+
 		vao.unbind();
 		vbo.unbind();
 

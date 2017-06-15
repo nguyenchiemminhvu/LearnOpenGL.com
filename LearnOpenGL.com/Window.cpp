@@ -182,7 +182,7 @@ int Window::exec() {
 		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
 
-		- 1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
@@ -218,16 +218,8 @@ int Window::exec() {
 	cubeTex.generateMipmap();
 	cubeTex.unbind();
 
-	// Enable writing to the stencil buffer.
-	// Render objects, updating the content of the stencil buffer.
-	// Disable writing to the stencil buffer.
-	// Render(other) objects, this time discarding certain fragments based on the content of the stencil buffer.
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_EQUAL, 0, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	glStencilMask(0x00);
 	
 
 	// --------------------------------------------------------------
@@ -247,7 +239,7 @@ int Window::exec() {
 
 		// drawing
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		cubeShader.use();
 
@@ -257,7 +249,6 @@ int Window::exec() {
 		glm::mat4 projection;
 		{
 			model = glm::translate(model, glm::vec3(0, 0, 0));
-			model = glm::rotate(model, (float)glfwGetTime() * glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			view = camera.getViewMatrix();
 			projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 
@@ -269,23 +260,39 @@ int Window::exec() {
 		Texture::active(cubeTex.getTextureID());
 		cubeTex.bind();
 		cubeShader.setUniform1i("tex", cubeTex.getTextureID());
+		cubeShader.setUniform3f("reflectionColor", 1.0F, 1.0F, 1.0F);
 
 		vbo.bind();
 		vao.bind();
 		vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+
+		// render the plane and write value 1 to stencil buffer
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF);
+		glDepthMask(GL_FALSE);
+
+		glClear(GL_STENCIL_BUFFER_BIT);
 		vbo.renderBuffer(GL_TRIANGLES, 36, 6);
 
 		// reflection
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDepthMask(GL_TRUE);
 		{
 			model = glm::translate(model, glm::vec3(0, 0, -1));
 			model = glm::scale(model, glm::vec3(1, 1, -1));
 
 			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniform3f("reflectionColor", 0.3F, 0.3F, 0.3F);
 			vbo.renderBuffer(GL_TRIANGLES, 0, 36);
 		}
 
 		vao.unbind();
 		vbo.unbind();
+
+		glDisable(GL_STENCIL_TEST);
 
 		swapBuffer();
 	}

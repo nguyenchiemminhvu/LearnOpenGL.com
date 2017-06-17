@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <iostream>
 
-#define __CURRENT_LESSION__ 5
+#define __CURRENT_LESSION__ 6
 
 #define __GET_STARTED__		1
 #define __LIGHTING__		2
 #define __MODEL__ 			3
 #define __DEPTH_TEST__		4
 #define __STENCIL_TEST__	5
+#define __BLENDING__		6
 
 using std::cout;
 using std::endl;
@@ -314,6 +315,278 @@ int Window::exec() {
 
 		glDisable(GL_STENCIL_TEST);
 
+		swapBuffer();
+	}
+
+	return 0;
+}
+
+#elif (__CURRENT_LESSION__ == __BLENDING__)
+
+int Window::exec() {
+
+	// --------------------------------------------------------------
+	// prepare for game loop
+
+	float cubeVertices[] = {
+		// positions          // texture Coords
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	float planeVertices[] = {
+		// positions          // texture Coords 
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+	};
+
+	float transparentVertices[] = {
+		// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+	};
+
+	Shader blendShader("shaders/Blending.VS", "shaders/Blending.FS");
+
+	VertexArray vaoCube;
+	VertexBuffer vboCube;
+	Texture texCube;
+
+	// init for cube
+	{
+		vaoCube.bind();
+		vboCube.bind();
+
+		{
+			vboCube.setData(sizeof(cubeVertices), cubeVertices);
+			vaoCube.enableAttribute(blendShader.getAttribLocation("position"));
+			vaoCube.vertexAttribArray(blendShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
+			vaoCube.enableAttribute(blendShader.getAttribLocation("uv"));
+			vaoCube.vertexAttribArray(blendShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+		}
+
+		vboCube.unbind();
+		vaoCube.unbind();
+
+		texCube.bind();
+		texCube.loadImage("textures/wood.png");
+		texCube.textureParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		texCube.textureParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texCube.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texCube.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texCube.generateMipmap();
+		texCube.unbind();
+	}
+
+	VertexArray vaoFloor;
+	VertexBuffer vboFloor;
+	Texture texFloor;
+
+	// init for floor
+	{
+		vaoFloor.bind();
+		vboFloor.bind();
+
+		{
+			vboFloor.setData(sizeof(planeVertices), planeVertices);
+			vaoFloor.enableAttribute(blendShader.getAttribLocation("position"));
+			vaoFloor.vertexAttribArray(blendShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
+			vaoFloor.enableAttribute(blendShader.getAttribLocation("uv"));
+			vaoFloor.vertexAttribArray(blendShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+		}
+
+		vboFloor.unbind();
+		vaoFloor.unbind();
+
+		texFloor.bind();
+		texFloor.loadImage("textures/wall.png");
+		texFloor.textureParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		texFloor.textureParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
+		texFloor.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texFloor.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texFloor.generateMipmap();
+		texFloor.unbind();
+	}
+
+	VertexArray vaoTransparent;
+	VertexBuffer vboTransparent;
+	Texture texTransparent;
+
+	// init for Transparent
+	{
+		vaoTransparent.bind();
+		vboTransparent.bind();
+
+		{
+			vboTransparent.setData(sizeof(transparentVertices), transparentVertices);
+			vaoTransparent.enableAttribute(blendShader.getAttribLocation("position"));
+			vaoTransparent.vertexAttribArray(blendShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
+			vaoTransparent.enableAttribute(blendShader.getAttribLocation("uv"));
+			vaoTransparent.vertexAttribArray(blendShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+		}
+
+		vboTransparent.unbind();
+		vaoTransparent.unbind();
+
+		texTransparent.bind();
+		texTransparent.loadImage("textures/grass.png");
+		texTransparent.textureParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		texTransparent.textureParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texTransparent.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texTransparent.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texTransparent.generateMipmap();
+		texTransparent.unbind();
+	}
+
+
+	std::vector<glm::vec3> vegetation
+	{
+		glm::vec3(-1.5f, 0.0f, -0.48f),
+		glm::vec3(1.5f, 0.0f, 0.51f),
+		glm::vec3(0.0f, 0.0f, 0.7f),
+		glm::vec3(-0.3f, 0.0f, -2.3f),
+		glm::vec3(0.5f, 0.0f, -0.6f)
+	};
+
+	glEnable(GL_DEPTH_TEST);
+
+	// --------------------------------------------------------------
+	// game loop
+	while (!windowShouldClose())
+	{
+		glfwPollEvents();
+
+		::deltaTime = glfwGetTime() - ::last_time;
+		::last_time = glfwGetTime();
+		/* calculate FPS */
+		GLfloat fps = 1.0f / deltaTime;
+		while (glfwGetTime() - ::last_time < 1.0f / FPS) {
+
+		}
+		updateCamera();
+
+		// drawing
+		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		blendShader.use();
+
+		// model view projection matrix
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		{
+			view = camera.getViewMatrix();
+			projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+
+			blendShader.setUniformMatrix4fv("view", 1, GL_FALSE, glm::value_ptr(view));
+			blendShader.setUniformMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(projection));
+		}
+
+		// draw cubes
+		{
+			vaoCube.bind();
+			
+			// cube 1
+			model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			Texture::active(texCube.getTextureID());
+			texCube.bind();
+			blendShader.setUniform1i("tex", texCube.getTextureID());
+			vboCube.renderBuffer(GL_TRIANGLES, 0, 36);
+
+			// cube 2
+			model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			Texture::active(texCube.getTextureID());
+			texCube.bind();
+			blendShader.setUniform1i("tex", texCube.getTextureID());
+			vboCube.renderBuffer(GL_TRIANGLES, 0, 36);
+
+			vaoCube.unbind();
+		}
+
+		// draw floor
+		{
+			vaoFloor.bind();
+
+			model = glm::mat4();
+			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			Texture::active(texFloor.getTextureID());
+			texFloor.bind();
+			blendShader.setUniform1i("tex", texFloor.getTextureID());
+			vboFloor.renderBuffer(GL_TRIANGLES, 0, 6);
+
+			vaoFloor.unbind();
+		}
+
+		// draw grass
+		{
+			vaoTransparent.bind();
+
+			Texture::active(texTransparent.getTextureID());
+			texTransparent.bind();
+			for (int i = 0; i < vegetation.size(); i++)
+			{
+				model = glm::translate(model, vegetation.at(i));
+				blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+				blendShader.setUniform1i("tex", texTransparent.getTextureID());
+				vboTransparent.renderBuffer(GL_TRIANGLES, 0, 6);
+			}
+
+			vaoTransparent.unbind();
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 		swapBuffer();
 	}
 

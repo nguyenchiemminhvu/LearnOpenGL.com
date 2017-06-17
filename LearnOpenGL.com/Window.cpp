@@ -187,7 +187,15 @@ int Window::exec() {
 		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
 		-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+		// plane's border
+		-1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f
 	};
 
 	Shader cubeShader("shaders/StencilTest.VS", "shaders/StencilTest.FS");
@@ -242,7 +250,7 @@ int Window::exec() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		cubeShader.use();
-
+		
 		// model view projection matrix
 		glm::mat4 model;
 		glm::mat4 view;
@@ -278,7 +286,7 @@ int Window::exec() {
 
 		// reflection
 		glStencilFunc(GL_EQUAL, 1, 0xFF);
-		glStencilMask(0x00);
+		glStencilMask(0xFF);
 		glDepthMask(GL_TRUE);
 		{
 			model = glm::translate(model, glm::vec3(0, 0, -1));
@@ -287,6 +295,18 @@ int Window::exec() {
 			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
 			cubeShader.setUniform3f("reflectionColor", 0.3F, 0.3F, 0.3F);
 			vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+		}
+
+		// plane's border
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDepthMask(GL_TRUE);
+		{
+			model = glm::scale(model, glm::vec3(1.2f, 1.2f, 1.2f));
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniform3f("reflectionColor", 1.0F, 1.0F, 1.0F);
+
+			vbo.renderBuffer(GL_TRIANGLES, 42, 6);
 		}
 
 		vao.unbind();

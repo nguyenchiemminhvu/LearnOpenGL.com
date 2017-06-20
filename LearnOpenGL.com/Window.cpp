@@ -487,6 +487,36 @@ int Window::exec() {
 		texTransparent.unbind();
 	}
 
+	VertexArray vaoGlass;
+	VertexBuffer vboGlass;
+	Texture texGlass;
+
+	// init for glass colored
+	{
+		vaoGlass.bind();
+		vboGlass.bind();
+
+		{
+			vboGlass.setData(sizeof(transparentVertices), transparentVertices);
+			vaoGlass.enableAttribute(blendShader.getAttribLocation("position"));
+			vaoGlass.vertexAttribArray(blendShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)0);
+			vaoGlass.enableAttribute(blendShader.getAttribLocation("uv"));
+			vaoGlass.vertexAttribArray(blendShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+		}
+
+		vboGlass.unbind();
+		vaoGlass.unbind();
+
+		texGlass.bind();
+		texGlass.loadImage("textures/glass_colored.png");
+		texGlass.textureParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		texGlass.textureParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		texGlass.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texGlass.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texGlass.generateMipmap();
+		texGlass.unbind();
+	}
+
 
 	std::vector<glm::vec3> vegetation
 	{
@@ -498,6 +528,8 @@ int Window::exec() {
 	};
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// --------------------------------------------------------------
 	// game loop
@@ -575,15 +607,39 @@ int Window::exec() {
 
 			Texture::active(texTransparent.getTextureID());
 			texTransparent.bind();
-			for (int i = 0; i < vegetation.size(); i++)
+			std::map<float, glm::vec3> sorted;
+			for (unsigned int i = 0; i < vegetation.size(); i++)
 			{
-				model = glm::translate(model, vegetation.at(i));
+				float distance = glm::length(camera.cameraPosition - vegetation[i]);
+				sorted[distance] = vegetation[i];
+			}
+
+			for (std::map<float, glm::vec3>::reverse_iterator iter = sorted.rbegin(); iter != sorted.rend(); iter++)
+			{
+				model = glm::mat4();
+				model = glm::translate(model, iter->second);
 				blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
 				blendShader.setUniform1i("tex", texTransparent.getTextureID());
 				vboTransparent.renderBuffer(GL_TRIANGLES, 0, 6);
 			}
 
 			vaoTransparent.unbind();
+		}
+
+		// draw glass colored
+		{
+			vaoGlass.bind();
+
+			Texture::active(texGlass.getTextureID());
+			texGlass.bind();
+
+			model = glm::mat4();
+			model = glm::translate(model, (camera.cameraPosition + camera.cameraFront));
+			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			blendShader.setUniform1i("tex", texGlass.getTextureID());
+			vboGlass.renderBuffer(GL_TRIANGLES, 0, 6);
+
+			vaoGlass.unbind();
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);

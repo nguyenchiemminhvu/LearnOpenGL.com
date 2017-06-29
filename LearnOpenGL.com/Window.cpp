@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#define __CURRENT_LESSION__ 6
+#define __CURRENT_LESSION__ 7
 
 #define __GET_STARTED__		1
 #define __LIGHTING__		2
@@ -10,6 +10,7 @@
 #define __DEPTH_TEST__		4
 #define __STENCIL_TEST__	5
 #define __BLENDING__		6
+#define __FRAME_BUFFERS__	7
 
 using std::cout;
 using std::endl;
@@ -567,7 +568,7 @@ int Window::exec() {
 		// draw cubes
 		{
 			vaoCube.bind();
-			
+
 			// cube 1
 			model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
 			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
@@ -634,13 +635,107 @@ int Window::exec() {
 			texGlass.bind();
 
 			model = glm::mat4();
-			model = glm::translate(model, (camera.cameraPosition + camera.cameraFront));
+			
+
 			blendShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
 			blendShader.setUniform1i("tex", texGlass.getTextureID());
 			vboGlass.renderBuffer(GL_TRIANGLES, 0, 6);
 
 			vaoGlass.unbind();
 		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		swapBuffer();
+	}
+
+	return 0;
+}
+
+#elif (__CURRENT_LESSION__ == __FRAME_BUFFERS__)
+
+int Window::exec() {
+
+	// --------------------------------------------------------------
+	// prepare for game loop
+
+	float cubeVertices[] = {
+		// positions          // texture Coords
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	float planeVertices[] = {
+		// positions          // texture Coords 
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+	};
+
+	Shader bufferShader("shaders/FrameBuffers.VS", "shaders/FrameBuffers.FS");
+
+	// --------------------------------------------------------------
+	// game loop
+	while (!windowShouldClose())
+	{
+		glfwPollEvents();
+
+		::deltaTime = glfwGetTime() - ::last_time;
+		::last_time = glfwGetTime();
+		/* calculate FPS */
+		GLfloat fps = 1.0f / deltaTime;
+		while (glfwGetTime() - ::last_time < 1.0f / FPS) {
+
+		}
+		updateCamera();
+
+		// drawing
+		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		swapBuffer();

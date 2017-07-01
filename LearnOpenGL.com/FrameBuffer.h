@@ -15,12 +15,22 @@ public:
 
 	void bind();
 	void unbind();
-
 	void deleteBuffer();
+
+	GLenum checkBufferStatus();
+	bool isBufferCompleted();
+
+	// attach texture
+	bool hasAttachedTexture2D();
+	void createTextureAndAttach2D(int w, int h, GLenum attachment = GL_COLOR_ATTACHMENT0);
 
 private:
 
 	GLuint frameBufferID;
+
+	bool isAttachedTexture;
+	GLenum textureFormatFromAttachment(GLenum attachment);
+	GLenum textureTypeFromAttachment(GLenum attachment);
 
 };
 

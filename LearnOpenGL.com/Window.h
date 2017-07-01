@@ -14,6 +14,7 @@
 #include "VertexBuffer.h"
 #include "ElementBuffer.h"
 #include "Texture.h"
+#include "FrameBuffer.h"
 #include "Camera.h"
 #include "Model.h"
 

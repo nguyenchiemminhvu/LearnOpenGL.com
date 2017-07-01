@@ -658,63 +658,96 @@ int Window::exec() {
 	// --------------------------------------------------------------
 	// prepare for game loop
 
-	float cubeVertices[] = {
-		// positions          // texture Coords
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+		// plane's border
+		-1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f
 	};
 
-	float planeVertices[] = {
-		// positions          // texture Coords 
-		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+	Shader cubeShader("shaders/FrameBuffers.VS", "shaders/FrameBuffers.FS");
 
-		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
-	};
+	VertexArray vao;
+	vao.bind();
 
-	Shader bufferShader("shaders/FrameBuffers.VS", "shaders/FrameBuffers.FS");
+	VertexBuffer vbo;
+	vbo.setData(sizeof(vertices), vertices);
+
+	vao.enableAttribute(cubeShader.getAttribLocation("position"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("position"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(0));
+	vao.enableAttribute(cubeShader.getAttribLocation("color"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("color"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+	vao.enableAttribute(cubeShader.getAttribLocation("uv"));
+	vao.vertexAttribArray(cubeShader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat)));
+
+	vbo.unbind();
+	vao.unbind();
+
+	Texture cubeTex;
+	cubeTex.bind();
+	cubeTex.loadImage("textures/wall.png");
+	cubeTex.textureParameteri(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	cubeTex.textureParameteri(GL_TEXTURE_WRAP_T, GL_REPEAT);
+	cubeTex.textureParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	cubeTex.textureParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	cubeTex.generateMipmap();
+	cubeTex.unbind();
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 
 	// --------------------------------------------------------------
 	// game loop
@@ -735,9 +768,71 @@ int Window::exec() {
 		glClearColor(0.1F, 0.4F, 0.5F, 1.0F);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+		cubeShader.use();
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		// model view projection matrix
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		{
+			model = glm::translate(model, glm::vec3(0, 0, 0));
+			view = camera.getViewMatrix();
+			projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniformMatrix4fv("view", 1, GL_FALSE, glm::value_ptr(view));
+			cubeShader.setUniformMatrix4fv("projection", 1, GL_FALSE, glm::value_ptr(projection));
+		}
+
+		Texture::active(cubeTex.getTextureID());
+		cubeTex.bind();
+		cubeShader.setUniform1i("tex", cubeTex.getTextureID());
+		cubeShader.setUniform3f("reflectionColor", 1.0F, 1.0F, 1.0F);
+
+		vbo.bind();
+		vao.bind();
+		vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+
+		// render the plane and write value 1 to stencil buffer
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF);
+		glDepthMask(GL_FALSE);
+
+		glClear(GL_STENCIL_BUFFER_BIT);
+		vbo.renderBuffer(GL_TRIANGLES, 36, 6);
+
+		// reflection
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0xFF);
+		glDepthMask(GL_TRUE);
+		{
+			model = glm::translate(model, glm::vec3(0, 0, -1));
+			model = glm::scale(model, glm::vec3(1, 1, -1));
+
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniform3f("reflectionColor", 0.3F, 0.3F, 0.3F);
+			vbo.renderBuffer(GL_TRIANGLES, 0, 36);
+		}
+
+		// plane's border
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDepthMask(GL_TRUE);
+		{
+			model = glm::scale(model, glm::vec3(1.2f, 1.2f, 1.2f));
+			cubeShader.setUniformMatrix4fv("model", 1, GL_FALSE, glm::value_ptr(model));
+			cubeShader.setUniform3f("reflectionColor", 1.0F, 1.0F, 1.0F);
+
+			vbo.renderBuffer(GL_TRIANGLES, 42, 6);
+		}
+
+		vao.unbind();
+		vbo.unbind();
+
+		glDisable(GL_STENCIL_TEST);
+
 		swapBuffer();
 	}
 

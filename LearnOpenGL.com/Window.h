@@ -13,6 +13,7 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "ElementBuffer.h"
+#include "ColorFrameBuffer.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "Model.h"
